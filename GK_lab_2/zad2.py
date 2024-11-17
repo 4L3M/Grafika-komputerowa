@@ -35,6 +35,13 @@ def spin(angle):
     """Funkcja obracająca obiekt o zadany kąt."""
     glRotatef(angle, 0.0, 1.0, 0.0)  # Obrót wokół osi Y
 
+def get_color(u, v):
+    """Interpoluje kolor w zależności od parametrów u i v."""
+    r = 0.5 + 0.5 * np.sin(np.pi * u)
+    g = 0.5 + 0.5 * np.sin(np.pi * v)
+    b = 0.5 + 0.5 * np.sin(np.pi * (u + v))
+
+    return (r, g, b)
 
 def render(time):
     angle = time * 180.0 / np.pi  # Obliczanie kąta na podstawie czasu (w radianach)
@@ -42,7 +49,11 @@ def render(time):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
+
+
+    glRotatef(30, 1.0, 0.0, 0.0)  # Obrót o 30 stopni wokół osi X
     spin(angle)  # Obracanie obiektu na podstawie czasu
+    # glRotatef(angle, 0.0, 1.0, 0.0)
 
     axes()  # Rysowanie osi współrzędnych
 
@@ -53,6 +64,13 @@ def render(time):
     # Iteracja po wierzchołkach i rysowanie linii
     for i in range(egg_vertices.shape[0] - 1):
         for j in range(egg_vertices.shape[1] - 1):
+            u = i / (egg_vertices.shape[0] - 1)  # Normalizowanie wartości u
+            v = j / (egg_vertices.shape[1] - 1)  # Normalizowanie wartości v
+
+            # Uzyskiwanie koloru dla danego punktu
+            r, g, b = get_color(u, v)
+            glColor3f(r, g, b)
+
             # Łączenie punktów (i, j) z (i+1, j)
             glVertex3f(*egg_vertices[i][j])
             glVertex3f(*egg_vertices[i + 1][j])

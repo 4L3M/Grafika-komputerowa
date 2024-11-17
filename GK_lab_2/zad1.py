@@ -30,22 +30,44 @@ def egg_model(N):
 
     return vertices
 
+def get_color(u, v):
+    """Interpoluje kolor w zależności od parametrów u i v."""
+    r = 0.5 + 0.5 * np.sin(np.pi * u)
+    g = 0.5 + 0.5 * np.sin(np.pi * v)
+    b = 0.5 + 0.5 * np.sin(np.pi * (u + v))
+
+    return (r, g, b)
 
 def render(time):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
+    # Ustawienie kąta obrotu w czasie (płynny obrót)
+    angle = time * 30  # Obrót o 30 stopni na sekundę
+    #glRotatef(angle, 1.0, 1.0, 0.0)  # Obrót wokół osi X i Y
+
+    glRotatef(30, 1.0, 0.0, 0.0)  # Obrót o 30 stopni wokół osi X
+    glRotatef(angle, 0.0, 1.0, 0.0)
+
     axes()  # Rysowanie osi współrzędnych
 
     # Rysowanie modelu jajka
+
     glColor3f(1.0, 1.0, 1.0)  # Biały kolor punktów
     glBegin(GL_POINTS)
 
-    # Iteracja po wierzchołkach i rysowanie ich
+    # Iteracja po punktach jajka i przypisanie kolorów
     for i in range(egg_vertices.shape[0]):
         for j in range(egg_vertices.shape[1]):
-            glVertex3f(*egg_vertices[i][j])
+            u = i / (egg_vertices.shape[0] - 1)  # Normalizowanie wartości u
+            v = j / (egg_vertices.shape[1] - 1)  # Normalizowanie wartości v
 
+            # Uzyskiwanie koloru dla danego punktu
+            r, g, b = get_color(u, v)
+            glColor3f(r, g, b)
+
+            # Rysowanie punktu
+            glVertex3f(*egg_vertices[i][j])
     glEnd()
     glFlush()
 
