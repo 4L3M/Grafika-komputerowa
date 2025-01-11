@@ -88,7 +88,6 @@ def render(time):
 
 
 def spin(angle):
-    """Rotate the object by the specified angle."""
     glRotatef(angle, 1.0, 0.0, 0.0)  # Rotate around the Y-axis
     glRotatef(angle, 0.0, 1.0, 0.0)  # Rotate around the Z-axis
     glRotate(angle, 0.0, 0.0, 1.0)  # Rotate around the X-axis

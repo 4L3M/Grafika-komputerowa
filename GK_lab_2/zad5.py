@@ -14,7 +14,7 @@ z_angle = 0.0
 
 def startup():
     update_viewport(None, 400, 400)
-    glClearColor(1.0, 1.0, 1.0, 1.0)  # Ustawienie koloru tła na biały
+    glClearColor(0.0, 0.0, 0.0, 0.0)  # Ustawienie koloru tła na czarny - biały
     glEnable(GL_DEPTH_TEST)
 
 
@@ -51,7 +51,7 @@ def draw_triangle(p1, p2, p3, c1, c2, c3):
 
 def draw_triangle_outline(p1, p2, p3):
     glBegin(GL_LINE_LOOP) # Rysowanie linii łączących wierzchołki
-    glColor3f(0.0, 0.0, 0.0)  # Czarny obrys
+    glColor3f(1.0, 1.0, 1.0)  # Biały / Czarny obrys
     glVertex3fv(p1) # Wierzchołek 1
     glVertex3fv(p2) # Wierzchołek 2
     glVertex3fv(p3) # Wierzchołek 3

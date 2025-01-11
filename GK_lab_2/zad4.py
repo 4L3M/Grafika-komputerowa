@@ -11,17 +11,17 @@ def egg_model(N):
     u = np.linspace(0.0, 1.0, N)
     v = np.linspace(0.0, 1.0, N)
 
-    # Prepare arrays for vertices and colors
+    # Przygotowujemy tablicę wierzchołków oraz tablicę kolorów
     vertices = np.zeros((N, N, 3), dtype=np.float32)
     colors = np.zeros((N, N, 3), dtype=np.float32)
 
-    # Populate the vertex array with parametric equations for the egg shape
+    # Wypełniamy tablicę wierzchołków za pomocą parametrycznych równań jajka
     for i in range(N):
         for j in range(N):
             uu = u[i]
             vv = v[j]
 
-            # Parametric equations for the egg shape
+            # Parametryczne równania jajka
             x = (-90 * uu**5 + 225 * uu**4 - 270 * uu**3 + 180 * uu**2 - 45 * uu) * np.cos(np.pi * vv)
             y = 160 * uu**4 - 320 * uu**3 + 160 * uu**2 - 5
             z = (-90 * uu**5 + 225 * uu**4 - 270 * uu**3 + 180 * uu**2 - 45 * uu) * np.sin(np.pi * vv)
@@ -34,17 +34,17 @@ def egg_model(N):
     return vertices, colors
 
 def render(time):
-    angle = time * 180.0 / np.pi  # Calculate the rotation angle from time (in radians)
+    angle = time * 180.0 / np.pi  #Obliczanie kąta na podstawie czasu (w radianach)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
-    glRotatef(-30, 1.0, 0.0, 0.0)  # Rotate by 30 degrees around the X-axis
-    spin(angle)  # Rotate object based on time
+    glRotatef(-30, 1.0, 0.0, 0.0)  # Obrót o 30 stopni wokół osi X
+    spin(angle)  # Obracanie obiektu na podstawie czasu
 
-    axes()  # Draw the coordinate axes
+    axes()  # Rysowanie osi współrzędnych
 
-    # Drawing the egg model using triangle strips
+    # Rysowanie modelu jajka jako triangle strips
     for i in range(egg_vertices.shape[0] - 1):
         glBegin(GL_TRIANGLE_STRIP)
 
@@ -62,26 +62,24 @@ def render(time):
     glFlush()
 
 def spin(angle):
-    """Rotate the object by the specified angle."""
     glRotatef(angle, 1.0, 0.0, 0.0)  # Rotate around the Y-axis
     glRotatef(angle, 0.0, 1.0, 0.0)  # Rotate around the Z-axis
     glRotate(angle, 0.0, 0.0, 1.0)  # Rotate around the X-axis
 
 def axes():
-    """Draw the coordinate axes."""
     glBegin(GL_LINES)
 
-    # X-axis (red)
+    # Oś X (czerwona)
     glColor3f(1.0, 0.0, 0.0)
     glVertex3f(-5.0, 0.0, 0.0)
     glVertex3f(5.0, 0.0, 0.0)
 
-    # Y-axis (green)
+    # Oś Y (zielona)
     glColor3f(0.0, 1.0, 0.0)
     glVertex3f(0.0, -5.0, 0.0)
     glVertex3f(0.0, 5.0, 0.0)
 
-    # Z-axis (blue)
+    # Oś Z (niebieska)
     glColor3f(0.0, 0.0, 1.0)
     glVertex3f(0.0, 0.0, -5.0)
     glVertex3f(0.0, 0.0, 5.0)
@@ -121,7 +119,7 @@ def main():
     if not glfwInit():
         sys.exit(-1)
 
-    window = glfwCreateWindow(400, 400, "Egg Model", None, None)
+    window = glfwCreateWindow(400, 400, "Model jajka", None, None)
     if not window:
         glfwTerminate()
         sys.exit(-1)
@@ -130,8 +128,8 @@ def main():
     glfwSetFramebufferSizeCallback(window, update_viewport)
     glfwSwapInterval(1)
 
-    # Generate egg vertices and colors
-    N = 50  # Grid resolution
+    # Generowanie wierzchołków jajka i kolorów
+    N = 50  # Rozdzielczość siatki
     egg_vertices, egg_colors = egg_model(N)
 
     startup()
