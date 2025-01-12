@@ -6,6 +6,8 @@ from glfw.GLFW import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+
+
 def egg_model(N):
     """Generates an NxN grid of vertices representing the egg shape and assigns random colors to each vertex."""
     u = np.linspace(0.0, 1.0, N)

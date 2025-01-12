@@ -6,7 +6,8 @@ from glfw.GLFW import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-# DODAC PRZEJSCIA MIEDZY PARAMETRAMI
+from PIL import Image
+
 
 viewer = [0.0, 0.0, 10.0]
 
@@ -17,13 +18,11 @@ left_mouse_button_pressed = 0
 mouse_x_pos_old = 0
 delta_x = 0
 
-# Material properties
 mat_ambient = [1.0, 1.0, 1.0, 1.0]
 mat_diffuse = [1.0, 1.0, 1.0, 1.0]
 mat_specular = [1.0, 1.0, 1.0, 1.0]
 mat_shininess = 20.0
 
-# Light properties
 light_ambient = [0.1, 0.1, 0.0, 1.0]
 light_diffuse = [0.8, 0.8, 0.0, 1.0]
 light_specular = [1.0, 1.0, 1.0, 1.0]
@@ -33,52 +32,6 @@ att_constant = 1.0
 att_linear = 0.05
 att_quadratic = 0.001
 
-# Control variables
-current_component = "ambient"  # Can be 'ambient', 'diffuse', or 'specular'
-current_index = 0  # Index of the RGB component to modify
-
-def update_light_properties():
-    """Update light properties based on current values."""
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient)
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse)
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular)
-
-
-def print_current_values():
-    """Print the current values of the light components."""
-    print(f"Current Component: {current_component}")
-    print(f"Ambient: {light_ambient}")
-    print(f"Diffuse: {light_diffuse}")
-    print(f"Specular: {light_specular}")
-
-
-def change_current_component():
-    """Cycle through the components to select one for modification."""
-    global current_component
-    if current_component == "ambient":
-        current_component = "diffuse"
-    elif current_component == "diffuse":
-        current_component = "specular"
-    else:
-        current_component = "ambient"
-    print_current_values()
-
-
-def modify_component_value(delta):
-    """Modify the currently selected component's value."""
-    global light_ambient, light_diffuse, light_specular
-
-    component = {
-        "ambient": light_ambient,
-        "diffuse": light_diffuse,
-        "specular": light_specular,
-    }[current_component]
-
-    # Update the selected RGB value
-    component[current_index] = max(0.0, min(1.0, component[current_index] + delta))
-
-    update_light_properties()
-    print_current_values()
 
 def startup():
     update_viewport(None, 400, 400)
@@ -103,6 +56,18 @@ def startup():
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
 
+    glEnable(GL_TEXTURE_2D)
+    glEnable(GL_CULL_FACE)  # Włączenie face culling
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+    image = Image.open("D4_t.tga")
+
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, 3, image.size[0], image.size[1], 0,
+        GL_RGB, GL_UNSIGNED_BYTE, image.tobytes("raw", "RGB", 0, -1)
+    )
 
 def shutdown():
     pass
@@ -122,10 +87,16 @@ def render(time):
 
     glRotatef(theta, 0.0, 1.0, 0.0)
 
-    quadric = gluNewQuadric()
-    gluQuadricDrawStyle(quadric, GLU_FILL)
-    gluSphere(quadric, 3.0, 10, 10)
-    gluDeleteQuadric(quadric)
+    glBegin(GL_QUADS)  # Używamy GL_QUADS, aby narysować kwadrat
+    glTexCoord2f(0.0, 0.0)
+    glVertex3f(-5.0, -5.0, 0.0)  # Lewy dolny róg
+    glTexCoord2f(1.0, 0.0)
+    glVertex3f(5.0, -5.0, 0.0)  # Prawy dolny róg
+    glTexCoord2f(1.0, 1.0)
+    glVertex3f(5.0, 5.0, 0.0)  # Prawy górny róg
+    glTexCoord2f(0.0, 1.0)
+    glVertex3f(-5.0, 5.0, 0.0)  # Lewy górny róg
+    glEnd()
 
     glFlush()
 
@@ -149,22 +120,8 @@ def update_viewport(window, width, height):
 
 
 def keyboard_key_callback(window, key, scancode, action, mods):
-    global current_index
-
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
-    elif key == GLFW_KEY_TAB and action == GLFW_PRESS:
-        change_current_component()
-    elif key == GLFW_KEY_UP and action == GLFW_PRESS:
-        modify_component_value(0.1)
-    elif key == GLFW_KEY_DOWN and action == GLFW_PRESS:
-        modify_component_value(-0.1)
-    elif key == GLFW_KEY_LEFT and action == GLFW_PRESS:
-        current_index = (current_index - 1) % 3
-        print(f"Current index: {current_index}")
-    elif key == GLFW_KEY_RIGHT and action == GLFW_PRESS:
-        current_index = (current_index + 1) % 3
-        print(f"Current index: {current_index}")
 
 
 def mouse_motion_callback(window, x_pos, y_pos):
