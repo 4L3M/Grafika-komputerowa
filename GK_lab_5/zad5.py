@@ -7,6 +7,43 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image
 
+viewer = [0.0, 0.0, 10.0]
+
+theta = 0.0
+pix2angle = 1.0
+phi = 0.0
+piy2angle = 1.0
+left_mouse_button_pressed = 0
+mouse_x_pos_old = 0
+delta_x = 0
+mouse_y_pos_old = 0
+delta_y = 0
+
+mat_ambient = [1.0, 1.0, 1.0, 1.0]
+mat_diffuse = [1.0, 1.0, 1.0, 1.0]
+mat_specular = [1.0, 1.0, 1.0, 1.0]
+mat_shininess = 20.0
+light_ambient = [0.1, 0.1, 0.0, 1.0]
+light_diffuse = [0.9, 0.4, 0.9, 1.0]
+light_specular = [1.0, 1.0, 1.0, 1.0]
+light_position = [0.0, 0.0, 10.0, 1.0]
+
+# drugie zrodlo swiatla
+mat_ambient1 = [1.0, 1.0, 1.0, 1.0]
+mat_diffuse1 = [1.0, 1.0, 1.0, 1.0]
+mat_specular1 = [1.0, 1.0, 1.0, 1.0]
+mat_shininess1 = 20.0
+light_ambient1 = [0.05, 0.1, 0.0, 1.0]
+light_diffuse1 = [1.0, 0.0, 1.0, 1.0]
+light_specular1 = [1.0, 1.0, 1.0, 1.0]
+light_position1 = [10.0, 5.0, 1.0, 1.0]
+
+att_constant = 1.0
+att_linear = 0.05
+att_quadratic = 0.001
+
+x_buttons_state = 1
+
 
 def load_texture(file_name):
     """Ładuje teksturę z pliku."""
@@ -55,13 +92,20 @@ def egg_model(N):
 
 
 def render(time, texture):
+    global theta, phi, pix2angle, piy2angle
     angle = time * 180.0 / np.pi  # Obliczanie kąta na podstawie czasu (w radianach)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
+    gluLookAt(viewer[0], viewer[1], viewer[2],
+              0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
+
+    if left_mouse_button_pressed:
+        theta += delta_x * pix2angle
+        phi += delta_y * piy2angle
 
     glRotatef(-30, 1.0, 0.0, 0.0)  # Obrót o 30 stopni wokół osi X
-    spin(angle)  # Obracanie obiektu na podstawie czasu
+    glRotatef(angle, 1.0, 1.0, 0.0)  # Rotate based on time (around both X and Y axis)
 
     axes()  # Rysowanie osi współrzędnych
 
@@ -72,16 +116,17 @@ def render(time, texture):
 
         for j in range(egg_vertices.shape[1]):
             # Pierwszy wierzchołek: (i, j)
-            glTexCoord2f(*egg_tex_coords[i][j])  # Współrzędne tekstury
+            glTexCoord2f(egg_tex_coords[i][j][0], egg_tex_coords[i][j][1])  # Współrzędne tekstury
             glVertex3f(*egg_vertices[i][j])
 
             # Drugi wierzchołek: (i + 1, j)
-            glTexCoord2f(*egg_tex_coords[i + 1][j])  # Współrzędne tekstury
+            glTexCoord2f(egg_tex_coords[i + 1][j][0], egg_tex_coords[i + 1][j][1])  # Współrzędne tekstury
             glVertex3f(*egg_vertices[i + 1][j])
 
         glEnd()
 
     glFlush()
+
 
 
 def spin(angle):
@@ -135,6 +180,23 @@ def startup():
     update_viewport(None, 400, 400)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
+
+    glEnable(GL_TEXTURE_2D)  # Włącz teksturowanie
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse)
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
+    glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess)
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient)
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse)
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular)
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position)
+    glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, att_constant)
+    glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, att_linear)
+    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, att_quadratic)
+    glShadeModel(GL_SMOOTH)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
 
 
 def shutdown():
