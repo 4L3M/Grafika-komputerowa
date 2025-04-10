@@ -46,7 +46,7 @@ x_buttons_state = 1
 
 
 def load_texture(file_name):
-    """Ładuje teksturę z pliku."""
+    """Ładowanie teksturę z pliku."""
     image = Image.open(file_name)
     image = image.transpose(Image.FLIP_TOP_BOTTOM)  # Flip to match OpenGL's texture coordinate system
 
@@ -187,13 +187,16 @@ def startup():
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse)
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
     glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess)
+
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse)
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position)
+
     glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, att_constant)
     glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, att_linear)
     glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, att_quadratic)
+
     glShadeModel(GL_SMOOTH)
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)

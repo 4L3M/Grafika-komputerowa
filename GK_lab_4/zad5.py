@@ -6,7 +6,6 @@ from OpenGL.GLU import *
 from math import *
 import random
 import numpy as np
-import glfw
 import colorsys
 
 viewer_position = [0.0, 0.0, 10.0]
@@ -101,28 +100,17 @@ def setup():
 def shutdown():
     pass
 
+def spin(angle):
+    glRotatef(angle, 1.0, 0.0, 0.0)
+    glRotatef(angle, 0.0, 1.0, 0.0)
+    glRotatef(angle, 0.0, 0.0, 1.0)
 
 
-def color_from_normal(x, y, z):
-    # Normalizowanie wektora normalnego i mapowanie na kolor
-    length = sqrt(x ** 2 + y ** 2 + z ** 2)
-    if length > 0:
-        x /= length
-        y /= length
-        z /= length
-
-    r = abs(x)  # Czerwony na podstawie komponentu X
-    g = abs(y)  # Zielony na podstawie komponentu Y
-    b = abs(z)  # Niebieski na podstawie komponentu Z
-
-    # Optionally, increase brightness or add a gradient
-    brightness = 0.5    # Zwiększenie jasności
-    r = min(1.0, r + brightness)
-    g = min(1.0, g + brightness)
-    b = min(1.0, b + brightness)
-
-    return [r, g, b, 1.0]  # RGBA format
-
+def color_from_normal(nx, ny, nz):
+    r = (nx + 1.0) / 2.0
+    g = (ny + 1.0) / 2.0
+    b = (nz + 1.0) / 2.0
+    return [r, g, b, 1.0]
 
 
 def rotate(angle):
@@ -209,38 +197,51 @@ def initialize_coordinates():
 # Inicjalizowanie wektorów normalnych
 
 def initialize_normal_vectors():
+    """Initialize normal vectors for the egg surface."""
     for i in range(0, num_segments + 1):
         for j in range(0, num_segments + 1):
             u = i / num_segments
             v = j / num_segments
 
+            # pochodne
             xu = (-450 * u**4 + 900 * u**3 - 810 * u**2 + 360 * u - 45) * cos(pi * v)
             xv = pi * (90 * u**5 - 225 * u**4 + 270 * u**3 - 180 * u**2 + 45 * u) * sin(pi * v)
             yu = 640 * u**3 - 960 * u**2 + 320 * u
             yv = 0
             zu = (-450 * u**4 + 900 * u**3 - 810 * u**2 + 360 * u - 45) * sin(pi * v)
-            zv = (-pi) * (90 * u**5 - 225 * u**4 + 270 * u**3 - 180 * u**2 + 45 * u) * cos(pi * v)
+            zv = -pi * (90 * u**5 - 225 * u**4 + 270 * u**3 - 180 * u**2 + 45 * u) * cos(pi * v)
 
             x = yu * zv - zu * yv
             y = zu * xv - xu * zv
             z = xu * yv - yu * xv
 
+            # normalizacja
             length = sqrt(x**2 + y**2 + z**2)
-
             if length > 0:
                 x /= length
                 y /= length
                 z /= length
 
+            # odwróc wektory
             if i > num_segments / 2:
                 x *= -1
                 y *= -1
                 z *= -1
 
+            # Wyrównanie normalnych wektorów w okolicach biegunów
+            if u == 0 or u == 1:  # Dla biegunów
+                x = 0.0
+                y = -1.0
+                z = 0.0
+
+            elif u == 0.5:
+                x = 0.0
+                y = 1.0
+                z = 0.0
+
             normal_vectors_matrix[i][j][0] = x
             normal_vectors_matrix[i][j][1] = y
             normal_vectors_matrix[i][j][2] = z
-
 
 def get_color(u, v, time):
     """Interpoluje kolor w zależności od parametrów u, v i czasu."""
@@ -259,7 +260,6 @@ def color_from_normal(x, y, z):
         y /= length
         z /= length
 
-    # Create color based on the normal vector direction (simple RGB interpolation)
     r = 0.5 * (x + 1)  # Normalize to 0-1 range
     g = 0.5 * (y + 1)  # Normalize to 0-1 range
     b = 0.5 * (z + 1)  # Normalize to 0-1 range
@@ -272,7 +272,7 @@ def draw_normal_vectors():
             # Get the color based on the normal vector direction
             normal_color = color_from_normal(normal_vectors_matrix[i][j][0], normal_vectors_matrix[i][j][1],
                                              normal_vectors_matrix[i][j][2])
-            glColor4fv(normal_color)  # Apply the color to the normal vectors
+            glColor4fv(normal_color)
 
             glBegin(GL_LINES)
             glVertex3f(coordinates_matrix[i][j][0], coordinates_matrix[i][j][1] - 5, coordinates_matrix[i][j][2])
@@ -365,9 +365,9 @@ def update_viewport(window, width, height):
 def keyboard_key_callback(window, key, scancode, action, mods):
     global x_key_pressed
 
-    if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
-        glfw.set_window_should_close(window, True)
-    if key == glfw.KEY_X and action == glfw.PRESS:
+    if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
+        glfwSetWindowShouldClose(window, GLFW_TRUE)
+    if key == GLFW_KEY_X and action == GLFW_PRESS:
         x_key_pressed = not x_key_pressed
 
 
@@ -387,41 +387,42 @@ def mouse_motion_callback(window, x_pos, y_pos):
 def mouse_button_callback(window, button, action, mods):
     global mouse_left_pressed
 
-    if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:
+    if button == GLFW_MOUSE_BUTTON_LEFT and action == GLFW_PRESS:
         mouse_left_pressed = True
     else:
         mouse_left_pressed = False
 
 
 def main():
-    if not glfw.init():
+    if not glfwInit():
         sys.exit(-1)
 
-    window = glfw.create_window(400, 400, __file__, None, None)
+    window = glfwCreateWindow(400, 400, "Model jajka", None, None)
     if not window:
-        glfw.terminate()
+        glfwTerminate()
         sys.exit(-1)
 
     random.seed(1)
     initialize_normal_vectors()
     initialize_coordinates()
 
-    glfw.make_context_current(window)
-    glfw.set_framebuffer_size_callback(window, update_viewport)
-    glfw.set_key_callback(window, keyboard_key_callback)
-    glfw.set_cursor_pos_callback(window, mouse_motion_callback)
-    glfw.set_mouse_button_callback(window, mouse_button_callback)
-    glfw.swap_interval(1)
+    glfwMakeContextCurrent(window)
+    glfwSetFramebufferSizeCallback(window, update_viewport)
+    glfwSetKeyCallback(window, keyboard_key_callback)
+    glfwSetCursorPosCallback(window, mouse_motion_callback)
+    glfwSetMouseButtonCallback(window, mouse_button_callback)
+    glfwSwapInterval(1)
 
     setup()
-    while not glfw.window_should_close(window):
-        draw_scene(glfw.get_time())
-        glfw.swap_buffers(window)
-        glfw.poll_events()
+    while not glfwWindowShouldClose(window):
+        draw_scene(glfwGetTime())
+        glfwSwapBuffers(window)
+        glfwPollEvents()
     shutdown()
 
-    glfw.terminate()
+    glfwTerminate()
 
 
 if __name__ == '__main__':
     main()
+

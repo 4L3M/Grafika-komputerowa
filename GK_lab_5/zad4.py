@@ -21,6 +21,8 @@ mouse_y_pos_old = 0
 delta_y = 0
 delta_x = 0
 
+show_normals = False
+
 # Właściwości materiału dla obiektu
 mat_ambient = [1.0, 1.0, 1.0, 1.0]
 mat_diffuse = [1.0, 1.0, 1.0, 1.0]
@@ -160,42 +162,100 @@ def render(time):
 
 
 def draw_egg():
+    # Pętla iterująca przez wszystkie wiersze siatki (od góry do dołu jajka)
     for i in range(n):
+        # Pętla iterująca przez wszystkie kolumny siatki (od lewej do prawej jajka)
         for j in range(n):
-            if (i > (n / 2)):
-                glFrontFace(GL_CW)
-            else:
-                glFrontFace(GL_CCW)
+            # Podział na górną i dolną część jajka poprzez zmianę orientacji ścianek
+            if (i > (n / 2)):  # Dolna część jajka
+                glFrontFace(GL_CW)  # Orientacja zgodna z ruchem wskazówek zegara
+            else:  # Górna część jajka
+                glFrontFace(GL_CCW)  # Orientacja przeciwnie do ruchu wskazówek zegara
 
+            # Pierwszy trójkąt w danej komórce siatki
             glBegin(GL_TRIANGLES)
-            glTexCoord2f(matrix_with_textures[i][j + 1][0], matrix_with_textures[i][j + 1][1])
-            glNormal3f(matrix_with_vectors[i][j + 1][0], matrix_with_vectors[i][j + 1][1], matrix_with_vectors[i][j + 1][2])
-            glVertex3f(matrix[i][j + 1][0], matrix[i][j + 1][1] - 5, matrix[i][j + 1][2])
 
-            glTexCoord2f(matrix_with_textures[i][j][0], matrix_with_textures[i][j][1])
-            glNormal3f(matrix_with_vectors[i][j][0], matrix_with_vectors[i][j][1], matrix_with_vectors[i][j][2])
-            glVertex3f(matrix[i][j][0], matrix[i][j][1] - 5, matrix[i][j][2])
+            # Wierzchołek 1: prawa góra komórki siatki
+            glTexCoord2f(matrix_with_textures[i][j + 1][0],
+                         matrix_with_textures[i][j + 1][1])  # Współrzędne tekstury
+            glNormal3f(matrix_with_vectors[i][j + 1][0],
+                       matrix_with_vectors[i][j + 1][1],
+                       matrix_with_vectors[i][j + 1][2])  # Wektor normalny
+            glVertex3f(matrix[i][j + 1][0],
+                       matrix[i][j + 1][1] - 5,
+                       matrix[i][j + 1][2])  # Pozycja w przestrzeni 3D
 
-            glTexCoord2f(matrix_with_textures[i + 1][j + 1][0], matrix_with_textures[i + 1][j + 1][1])
-            glNormal3f(matrix_with_vectors[i + 1][j + 1][0], matrix_with_vectors[i + 1][j + 1][1],
+            # Wierzchołek 2: lewa góra komórki siatki
+            glTexCoord2f(matrix_with_textures[i][j][0],
+                         matrix_with_textures[i][j][1])
+            glNormal3f(matrix_with_vectors[i][j][0],
+                       matrix_with_vectors[i][j][1],
+                       matrix_with_vectors[i][j][2])
+            glVertex3f(matrix[i][j][0],
+                       matrix[i][j][1] - 5,
+                       matrix[i][j][2])
+
+            # Wierzchołek 3: prawa dół komórki siatki
+            glTexCoord2f(matrix_with_textures[i + 1][j + 1][0],
+                         matrix_with_textures[i + 1][j + 1][1])
+            glNormal3f(matrix_with_vectors[i + 1][j + 1][0],
+                       matrix_with_vectors[i + 1][j + 1][1],
                        matrix_with_vectors[i + 1][j + 1][2])
-            glVertex3f(matrix[i + 1][j + 1][0], matrix[i + 1][j + 1][1] - 5, matrix[i + 1][j + 1][2])
-            glEnd()
+            glVertex3f(matrix[i + 1][j + 1][0],
+                       matrix[i + 1][j + 1][1] - 5,
+                       matrix[i + 1][j + 1][2])
+            glEnd()  # Koniec rysowania pierwszego trójkąta
 
+            # Drugi trójkąt w danej komórce siatki
             glBegin(GL_TRIANGLES)
-            glTexCoord2f(matrix_with_textures[i + 1][j + 1][0], matrix_with_textures[i + 1][j + 1][1])
-            glNormal3f(matrix_with_vectors[i + 1][j + 1][0], matrix_with_vectors[i + 1][j + 1][1],
+
+            # Wierzchołek 1: prawa dół komórki siatki (wspólny z pierwszym trójkątem)
+            glTexCoord2f(matrix_with_textures[i + 1][j + 1][0],
+                         matrix_with_textures[i + 1][j + 1][1])
+            glNormal3f(matrix_with_vectors[i + 1][j + 1][0],
+                       matrix_with_vectors[i + 1][j + 1][1],
                        matrix_with_vectors[i + 1][j + 1][2])
-            glVertex3f(matrix[i + 1][j + 1][0], matrix[i + 1][j + 1][1] - 5, matrix[i + 1][j + 1][2])
+            glVertex3f(matrix[i + 1][j + 1][0],
+                       matrix[i + 1][j + 1][1] - 5,
+                       matrix[i + 1][j + 1][2])
 
-            glTexCoord2f(matrix_with_textures[i][j][0], matrix_with_textures[i][j][1])
-            glNormal3f(matrix_with_vectors[i][j][0], matrix_with_vectors[i][j][1], matrix_with_vectors[i][j][2])
-            glVertex3f(matrix[i][j][0], matrix[i][j][1] - 5, matrix[i][j][2])
+            # Wierzchołek 2: lewa góra komórki siatki (wspólny z pierwszym trójkątem)
+            glTexCoord2f(matrix_with_textures[i][j][0],
+                         matrix_with_textures[i][j][1])
+            glNormal3f(matrix_with_vectors[i][j][0],
+                       matrix_with_vectors[i][j][1],
+                       matrix_with_vectors[i][j][2])
+            glVertex3f(matrix[i][j][0],
+                       matrix[i][j][1] - 5,
+                       matrix[i][j][2])
 
-            glTexCoord2f(matrix_with_textures[i + 1][j][0], matrix_with_textures[i + 1][j][1])
-            glNormal3f(matrix_with_vectors[i + 1][j][0], matrix_with_vectors[i + 1][j][1], matrix_with_vectors[i + 1][j][2])
-            glVertex3f(matrix[i + 1][j][0], matrix[i + 1][j][1] - 5, matrix[i + 1][j][2])
-            glEnd()
+            # Wierzchołek 3: lewa dół komórki siatki
+            glTexCoord2f(matrix_with_textures[i + 1][j][0],
+                         matrix_with_textures[i + 1][j][1])
+            glNormal3f(matrix_with_vectors[i + 1][j][0],
+                       matrix_with_vectors[i + 1][j][1],
+                       matrix_with_vectors[i + 1][j][2])
+            glVertex3f(matrix[i + 1][j][0],
+                       matrix[i + 1][j][1] - 5,
+                       matrix[i + 1][j][2])
+            glEnd()  # Koniec rysowania drugiego trójkąta
+
+            if show_normals:
+                # Dodanie rysowania wektorów normalnych
+                vector_length = 0.5  # Długość wektora normalnego
+                normal_start = [matrix[i][j][0], matrix[i][j][1] - 5, matrix[i][j][2]]
+                normal_end = [normal_start[0] + matrix_with_vectors[i][j][0] * vector_length,
+                              normal_start[1] + matrix_with_vectors[i][j][1] * vector_length,
+                              normal_start[2] + matrix_with_vectors[i][j][2] * vector_length]
+
+                # Rysowanie wektora normalnego
+                glBegin(GL_LINES)
+                glColor3f(1.0, 0.0, 0.0)
+                glVertex3f(normal_start[0], normal_start[1], normal_start[2])
+                glVertex3f(normal_end[0], normal_end[1], normal_end[2])
+                glEnd()
+
+
 
 
 def generate_texture_coordinates():
@@ -204,14 +264,15 @@ def generate_texture_coordinates():
             u = i / n
             v = j / n
 
-            # obrocenie tekstury na wlasciwej polowce
+            # współrzędne tekstury
             if (i > (n / 2)):
+                # Dla dolnej połowy jajka
                 matrix_with_textures[i][j][0] = v
-                matrix_with_textures[i][j][1] = 1 - 2 * u
-
+                matrix_with_textures[i][j][1] = 1 - 2 * u  # przekształcamy teksturę, aby obejmowała całą powierzchnię
             else:
+                # Dla górnej połowy jajka
                 matrix_with_textures[i][j][0] = v
-                matrix_with_textures[i][j][1] = 2 * u
+                matrix_with_textures[i][j][1] = 2 * u  # odwrotnym rozciągnięciem
 
 
 def vertex_data():
@@ -219,17 +280,16 @@ def vertex_data():
         for j in range(0, n + 1):
             u = i / n
             v = j / n
-            # wsp. 'x'
+            # x
             matrix[i][j][0] = (-90 * pow(u, 5) + 225 * pow(u, 4) - 270 * pow(u, 3) + 180 * pow(u, 2) - 45 * u) * cos(
                 pi * v)
-            # wsp. 'y'
+            # y
             matrix[i][j][1] = 160 * pow(u, 4) - 320 * pow(u, 3) + 160 * pow(u, 2)
-            # wsp. 'z'
+            # z
             matrix[i][j][2] = (-90 * pow(u, 5) + 225 * pow(u, 4) - 270 * pow(u, 3) + 180 * pow(u, 2) - 45 * u) * sin(
                 pi * v)
 
 
-# wypelnienie tablicy z wektorami normalnymi wartosciami
 def normal_vectors():
     for i in range(0, n + 1):
         for j in range(0, n + 1):
@@ -260,6 +320,16 @@ def normal_vectors():
                 y *= -1
                 z *= -1
 
+            # Wyrównanie normalnych wektorów w okolicach biegunów
+            if u == 0 or u == 1:  # Dla biegunów
+                x = 0.0
+                y = -1.0
+                z = 0.0
+            elif u == 0.5:
+                x = 0.0
+                y = 1.0
+                z = 0.0
+
             matrix_with_vectors[i][j][0] = x
             matrix_with_vectors[i][j][1] = y
             matrix_with_vectors[i][j][2] = z
@@ -284,7 +354,7 @@ def update_viewport(window, width, height):
 
 
 def keyboard_key_callback(window, key, scancode, action, mods):
-    global choose_texture
+    global choose_texture, show_normals
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
     if key == GLFW_KEY_T and action == GLFW_PRESS:
@@ -292,6 +362,8 @@ def keyboard_key_callback(window, key, scancode, action, mods):
             choose_texture = 1
         else:
             choose_texture = 0
+    if key == GLFW_KEY_X and action == GLFW_PRESS:
+            show_normals = not show_normals
 
 
 def mouse_motion_callback(window, x_pos, y_pos):
